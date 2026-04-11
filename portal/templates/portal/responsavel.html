@@ -1,10 +1,184 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "portal/base.html" %}
+{% block title %}Buscar Responsável{% endblock %}
+
+{% block content %}
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 560px;
+    margin: 40px auto;
+    padding: 20px;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  .messages {
+    margin-bottom: 16px;
+    padding: 12px;
+    border-radius: 6px;
+    background: #f5f5f5;
+  }
+
+  .error {
+    color: #b00020;
+  }
+
+  .success {
+    color: #0a7a2f;
+  }
+
+  .info {
+    color: #0a58ca;
+  }
+
+  input, button {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  input[readonly] {
+    background: #f2f2f2;
+    color: #444;
+    cursor: not-allowed;
+  }
+
+  button {
+    margin-top: 8px;
+    cursor: pointer;
+  }
+
+  .card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 20px;
+    background: #fff;
+  }
+
+  .section-title {
+    margin-top: 0;
+  }
+
+  .muted {
+    color: #666;
+  }
+</style>
+
+<h1>Pesquisar Responsável</h1>
+<p class="muted">Veterinário logado: {{ vet_nome }}</p>
+
+{% if messages %}
+  <div class="messages" role="alert" aria-live="assertive">
+    {% for message in messages %}
+      <div class="{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if not responsavel_encontrado and not mostrar_cadastro %}
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="acao" value="buscar">
+
+  <div class="field">
+    <label for="{{ form_busca.cpf.id_for_label }}">
+      {{ form_busca.cpf.label }}
+    </label>
+    {{ form_busca.cpf }}
+    {{ form_busca.cpf.errors }}
+  </div>
+
+  <button type="submit">Buscar</button>
+</form>
+{% endif %}
+
+{% if responsavel_encontrado %}
+<div class="card">
+  <h2 class="section-title">Responsável encontrado</h2>
+  <p><strong>Nome:</strong> {{ responsavel_nome }}</p>
+
+  <form method="post" action="{% url 'portal:responsavel' %}">
+    {% csrf_token %}
+    <input type="hidden" name="acao" value="prosseguir">
+    <button type="submit">Prosseguir</button>
+  </form>
+</div>
+{% endif %}
+
+{% if mostrar_cadastro %}
+<div class="card">
+  <h2 class="section-title">Cadastrar novo responsável</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="acao" value="cadastrar">
+
+    <div class="field">
+      <label for="{{ form_cadastro.cpf.id_for_label }}">
+        {{ form_cadastro.cpf.label }}
+      </label>
+      {{ form_cadastro.cpf }}
+      {{ form_cadastro.cpf.errors }}
+    </div>
+
+    <div class="field">
+      <label for="{{ form_cadastro.nome.id_for_label }}">
+        {{ form_cadastro.nome.label }}
+      </label>
+      {{ form_cadastro.nome }}
+      {{ form_cadastro.nome.errors }}
+    </div>
+
+    <div class="field">
+      <label for="{{ form_cadastro.telefone.id_for_label }}">
+        {{ form_cadastro.telefone.label }}
+      </label>
+      {{ form_cadastro.telefone }}
+      {{ form_cadastro.telefone.errors }}
+    </div>
+
+    <button type="submit">Cadastrar</button>
+  </form>
+</div>
+{% endif %}
+
+<script>
+  const cpfInput = document.getElementById("cpf");
+  if (cpfInput) {
+    cpfInput.addEventListener("input", function () {
+      let value = this.value.replace(/\D/g, "").slice(0, 11);
+
+      if (value.length <= 3) {
+        this.value = value;
+        return;
+      }
+
+      if (value.length <= 6) {
+        this.value = value.slice(0, 3) + "." + value.slice(3);
+        return;
+      }
+
+      if (value.length <= 9) {
+        this.value = value.slice(0, 3) + "." + value.slice(3, 6) + "." + value.slice(6);
+        return;
+      }
+
+      this.value =
+        value.slice(0, 3) + "." +
+        value.slice(3, 6) + "." +
+        value.slice(6, 9) + "-" +
+        value.slice(9);
+    });
+  }
+
+  const cpfCadastro = document.getElementById("id_cpf");
+  if (cpfCadastro) {
+    cpfCadastro.setAttribute("readonly", "readonly");
+  }
+</script>
+
+{% endblock %}

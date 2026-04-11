@@ -1,10 +1,89 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "portal/base.html" %}
+{% load static %}
+
+{% block title %}Prontuário{% endblock %}
+
+{% block content %}
+
+<h1>Prontuário do Pet</h1>
+
+<!-- DADOS DO PET -->
+<div class="card">
+  <h2>Dados do Pet</h2>
+  <p><strong>Nome:</strong> {{ pet.nome }}</p>
+  <p><strong>Tipo:</strong> {{ pet.tipo }}</p>
+  <p><strong>Sexo:</strong> {{ pet.sexo|default:"-" }}</p>
+  <p><strong>Raça:</strong> {{ pet.raca|default:"-" }}</p>
+  <p><strong>Idade:</strong> {{ pet.idade|default:"-" }}</p>
+  <p><strong>Peso:</strong> {{ pet.peso|default:"-" }}</p>
+  <p><strong>Altura:</strong> {{ pet.altura|default:"-" }}</p>
+</div>
+
+<!-- VÍDEOS -->
+<div class="card">
+  <h2>Vídeos</h2>
+  {% if pet.videos %}
+    <div class="video-grid">
+      {% for v in pet.videos %}
+        <video controls preload="metadata" style="max-width: 100%;">
+          <source src="{{ BACKEND_BASE_URL }}{{ v.url }}" type="video/mp4">
+          Seu navegador não suporta reprodução de vídeo.
+        </video>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>Nenhum vídeo disponível.</p>
+  {% endif %}
+</div>
+
+<!-- NOVA OBSERVAÇÃO -->
+<div class="card">
+  <h2>Nova Observação</h2>
+  <textarea id="obsTexto" rows="4"></textarea>
+  <button onclick="salvarObs()">Salvar</button>
+</div>
+
+<!-- PRONTUÁRIO -->
+<div class="card">
+  <h2>Prontuário</h2>
+  {% if pet.prontuario %}
+    {% for o in pet.prontuario %}
+      <div class="prontuario-card">
+        <small>{{ o.data }}</small>
+        <p>{{ o.texto }}</p>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>Nenhuma observação registrada.</p>
+  {% endif %}
+</div>
+
+<a href="{% url 'portal:pets' %}">← Voltar</a>
+
+<script>
+  async function salvarObs() {
+    const texto = document.getElementById("obsTexto").value.trim();
+    if (!texto) {
+      alert("Digite a observação.");
+      return;
+    }
+
+    try {
+      const r = await fetch("{{ proxy_pet_observacao_url }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ texto })
+      });
+
+      if (r.ok) {
+        location.reload();
+      } else {
+        alert("Erro ao salvar observação");
+      }
+    } catch (e) {
+      alert("Erro de conexão");
+    }
+  }
+</script>
+
+{% endblock %}

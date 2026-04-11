@@ -1,10 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login do Veterinário</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 420px;
+            margin: 60px auto;
+            padding: 20px;
+        }
+        .field {
+            margin-bottom: 16px;
+        }
+        .errorlist {
+            color: #b00020;
+            list-style: none;
+            padding-left: 0;
+            margin: 6px 0 0;
+        }
+        .messages {
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 6px;
+            background: #ffe9e9;
+            color: #b00020;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: 0;
+            border-radius: 6px;
+            background: #0d6efd;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0b5ed7;
+        }
+    </style>
 </head>
 <body>
-$END$
+    <h1>Login do Veterinário</h1>
+
+    {% if messages %}
+        <div class="messages" role="alert" aria-live="assertive">
+            {% for message in messages %}
+                <div>{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'portal:login' %}">
+        {% csrf_token %}
+
+        <div class="field">
+            <label for="{{ form.crmv.id_for_label }}">{{ form.crmv.label }}</label>
+            {{ form.crmv }}
+            {{ form.crmv.errors }}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.senha.id_for_label }}">{{ form.senha.label }}</label>
+            {{ form.senha }}
+            {{ form.senha.errors }}
+        </div>
+
+        <button type="submit">Entrar</button>
+    </form>
 </body>
 </html>

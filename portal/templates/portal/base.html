@@ -1,10 +1,40 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+  <meta charset="utf-8">
+  <title>{% block title %}Portal Veterinário{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'portal/pets.css' %}">
 </head>
 <body>
-$END$
+
+  <!-- HEADER DO VETERINÁRIO -->
+  <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      background:#0d6efd;
+      color:white;
+      padding:12px 20px;
+      margin-bottom:20px;
+      border-radius:8px;
+  ">
+    <strong>🐾 TosseCheck</strong>
+
+    <div>
+      <a href="{% url 'portal:responsavel' %}"
+         style="color:white;margin-right:16px;text-decoration:none;font-weight:bold;">
+        Início
+      </a>
+
+      <a href="{% url 'portal:logout' %}"
+         style="color:white;text-decoration:none;font-weight:bold;">
+        Sair
+      </a>
+    </div>
+  </div>
+
+  {% block content %}{% endblock %}
+
 </body>
 </html>
