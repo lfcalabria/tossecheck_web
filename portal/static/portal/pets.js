@@ -1,58 +1,120 @@
 (function () {
-  const modal = document.getElementById("petModal");
-  const fab = document.getElementById("fabOpen");
-  const cancel = document.getElementById("cancelModal");
-  const form = document.getElementById("petForm");
+  'use strict';
 
-  const usuarioUuidInput = document.getElementById("usuario_uuid");
-  const nomeInput = document.getElementById("nome");
-  const tipoInput = document.getElementById("tipo");
-  const sexoInput = document.getElementById("sexo");
-  const racaInput = document.getElementById("raca");
-  const idadeInput = document.getElementById("idade");
-  const pesoInput = document.getElementById("peso");
-  const alturaInput = document.getElementById("altura");
+  /* ── Modal de cadastro de pet ── */
+  var modal   = document.getElementById('petModal');
+  var fab     = document.getElementById('fabOpen');
+  var cancel1 = document.getElementById('cancelModal');
+  var cancel2 = document.getElementById('cancelModal2');
+  var salvarBtn = document.getElementById('salvarPet');
+  var form    = document.getElementById('petForm');
+  var formMsg = document.getElementById('petFormMsg');
 
-  fab.onclick = () => modal.classList.add("show");
-  cancel.onclick = () => modal.classList.remove("show");
+  function openModal() {
+    if (modal) modal.classList.add('open');
+  }
 
-  modal.onclick = (e) => {
-    if (e.target === modal) modal.classList.remove("show");
-  };
-
-  form.onsubmit = async (e) => {
-    e.preventDefault();
-
-    const payload = {
-      usuario_uuid: usuarioUuidInput.value,
-      nome: nomeInput.value.trim(),
-      tipo: tipoInput.value,
-      sexo: sexoInput.value || null,
-      raca: racaInput.value.trim() || null,
-      idade: idadeInput.value ? parseInt(idadeInput.value, 10) : null,
-      peso: pesoInput.value ? parseFloat(pesoInput.value) : null,
-      altura: alturaInput.value ? parseFloat(alturaInput.value) : null,
-    };
-
-    const submitBtn = form.querySelector("button[type='submit']");
-    submitBtn.disabled = true;
-
-    try {
-      const r = await fetch(window.PORTAL.proxyCreatePet, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (r.ok) {
-        location.reload();
-      } else {
-        alert("Erro ao salvar pet");
-        submitBtn.disabled = false;
-      }
-    } catch {
-      alert("Erro de conexão");
-      submitBtn.disabled = false;
+  function closeModal() {
+    if (modal) {
+      modal.classList.remove('open');
+      if (formMsg) { formMsg.style.display = 'none'; formMsg.textContent = ''; }
     }
-  };
-})();
+  }
+
+  function showFormMsg(type, text) {
+    if (!formMsg) return;
+    formMsg.className = 'alert alert-' + type;
+    formMsg.textContent = text;
+    formMsg.style.display = 'block';
+  }
+
+  if (fab)     fab.addEventListener('click', openModal);
+  if (cancel1) cancel1.addEventListener('click', closeModal);
+  if (cancel2) cancel2.addEventListener('click', closeModal);
+
+  if (modal) {
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+  }
+
+  if (salvarBtn && form) {
+    salvarBtn.addEventListener('click', function () {
+      var url   = window.PORTAL && window.PORTAL.criarPetUrl;
+      var token = window.PORTAL && window.PORTAL.csrfToken;
+
+      if (!url) {
+        showFormMsg('error', 'Configuração inválida. Recarregue a página.');
+        return;
+      }
+
+      var nome   = (form.querySelector('[name="nome"]')   || {}).value || '';
+      var tipo   = (form.querySelector('[name="tipo"]')   || {}).value || '';
+      var uuid   = (form.querySelector('[name="usuario_uuid"]') || {}).value || '';
+
+      if (!nome.trim()) {
+        showFormMsg('error', 'Informe o nome do animal.');
+        var n = form.querySelector('[name="nome"]');
+        if (n) n.focus();
+        return;
+      }
+      if (!tipo) {
+        showFormMsg('error', 'Selecione o tipo do animal (Gato ou Cachorro).');
+        return;
+      }
+
+      var sexo   = (form.querySelector('[name="sexo"]')   || {}).value || null;
+      var raca   = (form.querySelector('[name="raca"]')   || {}).value || null;
+      var idade  = (form.querySelector('[name="idade"]')  || {}).value;
+      var peso   = (form.querySelector('[name="peso"]')   || {}).value;
+      var altura = (form.querySelector('[name="altura"]') || {}).value;
+
+      var payload = {
+        usuario_uuid: uuid,
+        nome: nome.trim(),
+        tipo: tipo,
+        sexo: sexo || null,
+        raca: raca ? raca.trim() || null : null,
+        idade:  idade  ? parseInt(idade,  10) : null,
+        peso:   peso   ? parseFloat(peso)     : null,
+        altura: altura ? parseFloat(altura)   : null
+      };
+
+      salvarBtn.disabled = true;
+      salvarBtn.textContent = 'Salvando…';
+      if (formMsg) formMsg.style.display = 'none';
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': token || ''
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(function (r) {
+        if (r.ok) {
+          location.reload();
+        } else {
+          r.json().then(function (data) {
+            showFormMsg('error', data.erro || data.detail || 'Erro ao salvar pet. Tente novamente.');
+          }).catch(function () {
+            showFormMsg('error', 'Erro ao salvar pet. Tente novamente.');
+          });
+          salvarBtn.disabled = false;
+          salvarBtn.textContent = 'Salvar Pet';
+        }
+      })
+      .catch(function () {
+        showFormMsg('error', 'Erro de conexão. Verifique sua rede e tente novamente.');
+        salvarBtn.disabled = false;
+        salvarBtn.textContent = 'Salvar Pet';
+      });
+    });
+  }
+
+}());

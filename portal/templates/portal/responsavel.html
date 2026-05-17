@@ -1,184 +1,137 @@
 {% extends "portal/base.html" %}
-{% block title %}Buscar Responsável{% endblock %}
+{% block title %}Pesquisar Responsável — TosseCheck{% endblock %}
 
 {% block content %}
 
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 560px;
-    margin: 40px auto;
-    padding: 20px;
-  }
-
-  .field {
-    margin-bottom: 16px;
-  }
-
-  .messages {
-    margin-bottom: 16px;
-    padding: 12px;
-    border-radius: 6px;
-    background: #f5f5f5;
-  }
-
-  .error {
-    color: #b00020;
-  }
-
-  .success {
-    color: #0a7a2f;
-  }
-
-  .info {
-    color: #0a58ca;
-  }
-
-  input, button {
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-  }
-
-  input[readonly] {
-    background: #f2f2f2;
-    color: #444;
-    cursor: not-allowed;
-  }
-
-  button {
-    margin-top: 8px;
-    cursor: pointer;
-  }
-
-  .card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 16px;
-    margin-top: 20px;
-    background: #fff;
-  }
-
-  .section-title {
-    margin-top: 0;
-  }
-
-  .muted {
-    color: #666;
-  }
-</style>
-
-<h1>Pesquisar Responsável</h1>
-<p class="muted">Veterinário logado: {{ vet_nome }}</p>
+<div class="pg-hd">
+  <div>
+    <h1 class="pg-title">Pesquisar Responsável</h1>
+    <p class="pg-sub">Logado como <strong>{{ vet_nome }}</strong></p>
+  </div>
+</div>
 
 {% if messages %}
-  <div class="messages" role="alert" aria-live="assertive">
-    {% for message in messages %}
-      <div class="{{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-  </div>
+  {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}" role="alert">
+      {{ message }}
+    </div>
+  {% endfor %}
 {% endif %}
 
 {% if not responsavel_encontrado and not mostrar_cadastro %}
-<form method="post">
-  {% csrf_token %}
-  <input type="hidden" name="acao" value="buscar">
+  <div class="card" style="max-width:520px;">
+    <h2 class="card-title">Buscar por CPF</h2>
+    <p style="font-size:.875rem;color:var(--tx2);margin-bottom:20px;">
+      Informe o CPF do responsável pelo animal para localizar ou cadastrar o tutor.
+    </p>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="acao" value="buscar">
 
-  <div class="field">
-    <label for="{{ form_busca.cpf.id_for_label }}">
-      {{ form_busca.cpf.label }}
-    </label>
-    {{ form_busca.cpf }}
-    {{ form_busca.cpf.errors }}
+      <div class="field">
+        <label for="{{ form_busca.cpf.id_for_label }}">{{ form_busca.cpf.label }}</label>
+        {{ form_busca.cpf }}
+        {% if form_busca.cpf.errors %}
+          <ul class="errorlist">{% for e in form_busca.cpf.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" style="margin-top:4px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="margin-right:6px;vertical-align:middle;"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        Buscar Responsável
+      </button>
+    </form>
   </div>
-
-  <button type="submit">Buscar</button>
-</form>
 {% endif %}
 
 {% if responsavel_encontrado %}
-<div class="card">
-  <h2 class="section-title">Responsável encontrado</h2>
-  <p><strong>Nome:</strong> {{ responsavel_nome }}</p>
+  <div class="card found-row" style="max-width:520px;">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--g100);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--g700)" aria-hidden="true"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+      </div>
+      <div>
+        <h2 class="card-title" style="margin-bottom:2px;">Responsável Encontrado</h2>
+        <p style="font-size:1rem;font-weight:600;color:var(--tx);margin:0;">{{ responsavel_nome }}</p>
+      </div>
+    </div>
 
-  <form method="post" action="{% url 'portal:responsavel' %}">
-    {% csrf_token %}
-    <input type="hidden" name="acao" value="prosseguir">
-    <button type="submit">Prosseguir</button>
-  </form>
-</div>
+    <form method="post" action="{% url 'portal:responsavel' %}">
+      {% csrf_token %}
+      <input type="hidden" name="acao" value="prosseguir">
+      <button type="submit" class="btn btn-primary">
+        Ver Pets deste Responsável
+      </button>
+    </form>
+  </div>
 {% endif %}
 
 {% if mostrar_cadastro %}
-<div class="card">
-  <h2 class="section-title">Cadastrar novo responsável</h2>
+  <div class="card" style="max-width:520px;">
+    <h2 class="card-title">Cadastrar Novo Responsável</h2>
+    <p style="font-size:.875rem;color:var(--tx2);margin-bottom:20px;">
+      CPF não encontrado no sistema. Preencha os dados abaixo para cadastrar o tutor.
+    </p>
 
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="acao" value="cadastrar">
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="acao" value="cadastrar">
 
-    <div class="field">
-      <label for="{{ form_cadastro.cpf.id_for_label }}">
-        {{ form_cadastro.cpf.label }}
-      </label>
-      {{ form_cadastro.cpf }}
-      {{ form_cadastro.cpf.errors }}
-    </div>
+      <div class="field">
+        <label for="{{ form_cadastro.cpf.id_for_label }}">{{ form_cadastro.cpf.label }}</label>
+        {{ form_cadastro.cpf }}
+        {% if form_cadastro.cpf.errors %}
+          <ul class="errorlist">{% for e in form_cadastro.cpf.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
 
-    <div class="field">
-      <label for="{{ form_cadastro.nome.id_for_label }}">
-        {{ form_cadastro.nome.label }}
-      </label>
-      {{ form_cadastro.nome }}
-      {{ form_cadastro.nome.errors }}
-    </div>
+      <div class="field">
+        <label for="{{ form_cadastro.nome.id_for_label }}">{{ form_cadastro.nome.label }}</label>
+        {{ form_cadastro.nome }}
+        {% if form_cadastro.nome.errors %}
+          <ul class="errorlist">{% for e in form_cadastro.nome.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
 
-    <div class="field">
-      <label for="{{ form_cadastro.telefone.id_for_label }}">
-        {{ form_cadastro.telefone.label }}
-      </label>
-      {{ form_cadastro.telefone }}
-      {{ form_cadastro.telefone.errors }}
-    </div>
+      <div class="field">
+        <label for="{{ form_cadastro.telefone.id_for_label }}">{{ form_cadastro.telefone.label }}</label>
+        {{ form_cadastro.telefone }}
+        {% if form_cadastro.telefone.errors %}
+          <ul class="errorlist">{% for e in form_cadastro.telefone.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
 
-    <button type="submit">Cadastrar</button>
-  </form>
-</div>
+      <button type="submit" class="btn btn-primary btn-full" style="margin-top:4px;">
+        Cadastrar Responsável
+      </button>
+    </form>
+  </div>
 {% endif %}
 
+{% endblock %}
+
+{% block extra_scripts %}
 <script>
-  const cpfInput = document.getElementById("cpf");
-  if (cpfInput) {
-    cpfInput.addEventListener("input", function () {
-      let value = this.value.replace(/\D/g, "").slice(0, 11);
-
-      if (value.length <= 3) {
-        this.value = value;
-        return;
-      }
-
-      if (value.length <= 6) {
-        this.value = value.slice(0, 3) + "." + value.slice(3);
-        return;
-      }
-
-      if (value.length <= 9) {
-        this.value = value.slice(0, 3) + "." + value.slice(3, 6) + "." + value.slice(6);
-        return;
-      }
-
-      this.value =
-        value.slice(0, 3) + "." +
-        value.slice(3, 6) + "." +
-        value.slice(6, 9) + "-" +
-        value.slice(9);
+(function () {
+  function maskCpf(input) {
+    input.addEventListener('input', function () {
+      var v = this.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length <= 3)       { this.value = v; return; }
+      if (v.length <= 6)       { this.value = v.slice(0,3) + '.' + v.slice(3); return; }
+      if (v.length <= 9)       { this.value = v.slice(0,3) + '.' + v.slice(3,6) + '.' + v.slice(6); return; }
+      this.value = v.slice(0,3) + '.' + v.slice(3,6) + '.' + v.slice(6,9) + '-' + v.slice(9);
     });
   }
 
-  const cpfCadastro = document.getElementById("id_cpf");
-  if (cpfCadastro) {
-    cpfCadastro.setAttribute("readonly", "readonly");
-  }
-</script>
+  var search = document.getElementById('cpf');
+  if (search) maskCpf(search);
 
+  var cadastroCpf = document.getElementById('id_cpf');
+  if (cadastroCpf) {
+    cadastroCpf.setAttribute('readonly', 'readonly');
+    cadastroCpf.style.backgroundColor = 'var(--g50)';
+    cadastroCpf.style.cursor = 'not-allowed';
+  }
+}());
+</script>
 {% endblock %}
