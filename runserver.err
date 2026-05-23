@@ -181,3 +181,21 @@ WARNINGS:
 System check identified 1 issue (0 silenced).
 [23/May/2026 14:38:57] "GET /portal/demo/ HTTP/1.1" 302 0
 [23/May/2026 14:38:57,268] - Broken pipe from ('127.0.0.1', 62950)
+[23/May/2026 14:39:04] "GET /portal/demo/ HTTP/1.1" 302 0
+[23/May/2026 14:39:04] "GET /portal/login/ HTTP/1.1" 200 4315
+[23/May/2026 14:39:04] "GET /static/portal/pets.css HTTP/1.1" 304 0
+[23/May/2026 14:39:24] "GET /portal/demo/ HTTP/1.1" 302 0
+[23/May/2026 14:39:24] "GET /portal/login/ HTTP/1.1" 200 4315
+[23/May/2026 14:39:31] "POST /portal/login/ HTTP/1.1" 302 0
+[23/May/2026 14:39:31] "GET /portal/responsavel/ HTTP/1.1" 200 4642
+[23/May/2026 14:39:31] "GET /static/portal/pets.js HTTP/1.1" 304 0
+[23/May/2026 14:39:37] "POST /portal/responsavel/ HTTP/1.1" 200 4514
+[23/May/2026 14:39:40] "POST /portal/responsavel/ HTTP/1.1" 302 0
+[23/May/2026 14:39:40] "GET /portal/pets/ HTTP/1.1" 200 7362
+[23/May/2026 14:39:50] "GET /portal/pets/11111111-1111-1111-1111-111111111111/ HTTP/1.1" 200 9497
+[23/May/2026 14:41:34] "GET /portal/pets/11111111-1111-1111-1111-111111111111/ HTTP/1.1" 200 9497
+[23/May/2026 14:41:34] "GET /static/portal/pets.css HTTP/1.1" 304 0
+[23/May/2026 14:41:34] "GET /static/portal/pets.js HTTP/1.1" 304 0
+[23/May/2026 14:41:35] "GET /portal/pets/11111111-1111-1111-1111-111111111111/ HTTP/1.1" 200 9497
+[23/May/2026 14:41:40] "GET /portal/pets/ HTTP/1.1" 200 7362
+[23/May/2026 14:41:44] "GET /portal/responsavel/ HTTP/1.1" 200 4642
