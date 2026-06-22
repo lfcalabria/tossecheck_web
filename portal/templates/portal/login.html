@@ -4,158 +4,78 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Acesso ao Portal — TosseCheck</title>
+  <title>Acesso ao Portal - TosseCheck</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'portal/pets.css' %}">
-  <style>
-    body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: var(--n-50);
-      padding: var(--sp-6) var(--sp-4);
-    }
-
-    .login-wrap {
-      width: 100%;
-      max-width: 400px;
-    }
-
-    .login-brand {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-
-    .login-logo-img {
-      width: 160px;
-      height: auto;
-      object-fit: contain;
-      margin: 0 auto var(--sp-4);
-      display: block;
-    }
-
-    .login-sub {
-      font-size: 0.875rem;
-      color: var(--n-600);
-      margin: 0;
-    }
-
-    .login-card {
-      background: var(--n-0);
-      border: 1px solid var(--n-200);
-      border-radius: var(--r-md);
-      box-shadow: var(--e2);
-      overflow: hidden;
-    }
-
-    .login-card-head {
-      background: var(--blue-900);
-      padding: 18px 28px;
-    }
-
-    .login-card-head h2 {
-      font-family: var(--font-display);
-      margin: 0;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #fff;
-      letter-spacing: .01em;
-    }
-
-    .login-card-body {
-      padding: 28px;
-    }
-
-    .field {
-      margin-bottom: 18px;
-    }
-
-    .field label {
-      display: block;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--n-600);
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      margin-bottom: 6px;
-    }
-
-    .errorlist {
-      list-style: none;
-      padding: 0;
-      margin: 6px 0 0;
-      font-size: 0.82rem;
-      color: var(--error);
-    }
-
-    .login-footer {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 0.78rem;
-      color: var(--n-400);
-    }
-  </style>
 </head>
-<body>
+<body class="login-page">
 
-  <div class="login-wrap">
+  <div class="login-shell">
+    <section class="login-brand-panel" aria-label="TosseCheck">
+      <div class="login-brand-top">
+        <img src="{% static 'portal/img/logo.png' %}" alt="TosseCheck" class="login-logo-img">
+        <p class="login-brand-title">Tosse<span>Check</span></p>
+      </div>
 
-    <div class="login-brand">
-      <img src="{% static 'portal/img/logo.png' %}" alt="TosseCheck" class="login-logo-img">
-      <p class="login-sub">Telemedicina Veterinária</p>
-    </div>
+      <div class="login-brand-copy">
+        <p class="page-kicker">Portal do Veterinário</p>
+        <h1>Dados clínicos de tosse com leitura rápida e segura.</h1>
+        <p>
+          Acesse responsáveis, pets, vídeos enviados e observações clínicas em uma interface pensada para rotina profissional.
+        </p>
+      </div>
 
-    <div class="login-card">
+      <p class="login-brand-note">
+        Sistema desenvolvido no Mestrado Profissional em Engenharia de Software do CESAR School.
+      </p>
+    </section>
+
+    <main class="login-form-panel">
       <div class="login-card-head">
-        <h2>Acesso ao Portal Veterinário</h2>
+        <h2>Acesso restrito</h2>
+        <p>Entre com seu CRMV e senha para continuar.</p>
       </div>
-      <div class="login-card-body">
 
-        {% if messages %}
-          {% for message in messages %}
-            <div class="alert alert-error" role="alert">{{ message }}</div>
-          {% endfor %}
-        {% endif %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-error" role="alert">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
 
-        <form method="post" action="{% url 'portal:login' %}">
-          {% csrf_token %}
+      <form method="post" action="{% url 'portal:login' %}">
+        {% csrf_token %}
 
-          <div class="field">
-            <label for="{{ form.crmv.id_for_label }}">{{ form.crmv.label }}</label>
-            {{ form.crmv }}
-            {% if form.crmv.errors %}
-              <ul class="errorlist">
-                {% for e in form.crmv.errors %}<li>{{ e }}</li>{% endfor %}
-              </ul>
-            {% endif %}
-          </div>
+        <div class="field">
+          <label for="{{ form.crmv.id_for_label }}">{{ form.crmv.label }}</label>
+          {{ form.crmv }}
+          {% if form.crmv.errors %}
+            <ul class="errorlist">
+              {% for e in form.crmv.errors %}<li>{{ e }}</li>{% endfor %}
+            </ul>
+          {% endif %}
+        </div>
 
-          <div class="field">
-            <label for="{{ form.senha.id_for_label }}">{{ form.senha.label }}</label>
-            {{ form.senha }}
-            {% if form.senha.errors %}
-              <ul class="errorlist">
-                {% for e in form.senha.errors %}<li>{{ e }}</li>{% endfor %}
-              </ul>
-            {% endif %}
-          </div>
+        <div class="field">
+          <label for="{{ form.senha.id_for_label }}">{{ form.senha.label }}</label>
+          {{ form.senha }}
+          {% if form.senha.errors %}
+            <ul class="errorlist">
+              {% for e in form.senha.errors %}<li>{{ e }}</li>{% endfor %}
+            </ul>
+          {% endif %}
+        </div>
 
-          <button type="submit" class="btn btn-primary btn-full" style="margin-top:8px;">
-            Entrar
-          </button>
-        </form>
+        <button type="submit" class="btn btn-primary btn-full">
+          Entrar no portal
+        </button>
+      </form>
 
-      </div>
-    </div>
-
-    <p class="login-footer">
-      Somente veterinários cadastrados têm acesso a este portal.
-    </p>
-
+      <p class="login-footer">
+        Somente veterinários cadastrados têm acesso ao portal.
+      </p>
+    </main>
   </div>
 
 </body>

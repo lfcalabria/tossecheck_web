@@ -96,8 +96,8 @@ def demo_data_padrao():
                         "uuid": "33333333-3333-3333-3333-333333333333",
                         "nome": "Luna",
                         "tipo": "Gato",
-                        "sexo": "Femea",
-                        "raca": "Siamese",
+                        "sexo": "Fêmea",
+                        "raca": "Siamês",
                         "idade": 2,
                         "peso": "4.20",
                         "altura": "25.00",
@@ -116,7 +116,7 @@ def demo_data_padrao():
                         "uuid": "55555555-5555-5555-5555-555555555555",
                         "nome": "Mel",
                         "tipo": "Cachorro",
-                        "sexo": "Femea",
+                        "sexo": "Fêmea",
                         "raca": "Shih-tzu",
                         "idade": 6,
                         "peso": "6.80",
@@ -454,7 +454,7 @@ def preview_template(request, template_name="login"):
                         "uuid": uuid.UUID("33333333-3333-3333-3333-333333333333"),
                         "nome": "Luna",
                         "tipo": "Gato",
-                        "sexo": "Femea",
+                        "sexo": "Fêmea",
                     },
                 ],
             },
@@ -702,23 +702,30 @@ def criar_pet(request):
     if modo_demo_ativo(request):
         return demo_criar_pet(request)
 
+    wants_json = "application/json" in request.META.get("CONTENT_TYPE", "").lower()
+
     if not request.session.get("vet_uuid"):
+        if wants_json:
+            return JsonResponse({"erro": "Não autenticado."}, status=401)
         return redirect("portal:login")
 
     responsavel_uuid = request.session.get("responsavel_uuid")
     if not responsavel_uuid:
+        if wants_json:
+            return JsonResponse({"erro": "Responsável não definido."}, status=400)
         messages.error(request, "Responsável não definido.")
         return redirect("portal:pets")
 
+    incoming = payload_request(request)
     payload = {
         "usuario_uuid": responsavel_uuid,
-        "nome": request.POST.get("nome"),
-        "tipo": request.POST.get("tipo"),
-        "sexo": request.POST.get("sexo"),
-        "raca": request.POST.get("raca"),
-        "idade": request.POST.get("idade"),
-        "peso": request.POST.get("peso"),
-        "altura": request.POST.get("altura"),
+        "nome": incoming.get("nome"),
+        "tipo": incoming.get("tipo"),
+        "sexo": incoming.get("sexo"),
+        "raca": incoming.get("raca"),
+        "idade": incoming.get("idade"),
+        "peso": incoming.get("peso"),
+        "altura": incoming.get("altura"),
     }
 
     try:
@@ -728,14 +735,23 @@ def criar_pet(request):
             timeout=10,
         )
     except requests.RequestException:
+        if wants_json:
+            return JsonResponse({"erro": "Erro ao conectar com o backend."}, status=502)
         messages.error(request, "Erro ao conectar com o backend.")
         return redirect("portal:pets")
 
     data = safe_json(r) or {}
 
     if r.status_code in (200, 201):
+        if wants_json:
+            return JsonResponse({"ok": True, "pet": data}, status=r.status_code)
         messages.success(request, "Pet cadastrado com sucesso.")
     else:
+        if wants_json:
+            return JsonResponse(
+                data or {"erro": "Erro ao cadastrar pet."},
+                status=r.status_code,
+            )
         messages.error(request, data.get("erro", "Erro ao cadastrar pet."))
 
     return redirect("portal:pets")
