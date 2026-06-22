@@ -1,5 +1,30 @@
-{% extends "portal/base.html" %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Pet - {{ pet.nome }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        nav { margin-bottom: 20px; }
+        nav a { margin-right: 10px; }
+        .pet-info { background: #f0f0f0; padding: 15px; margin-bottom: 20px; }
+        .videos-list { margin-bottom: 20px; }
+        .videos-list ul { list-style: none; padding: 0; }
+        .videos-list li { margin-bottom: 10px; }
+        #video-player { margin-bottom: 20px; text-align: center; }
+        #video { max-width: 100%; height: auto; }
+        .new-observacao { margin-bottom: 20px; }
+        .new-observacao textarea { width: 100%; height: 100px; }
+        .prontuario-item { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+        .prontuario-item h4 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'portal:pets' %}">← Lista de Pets</a>
+        <a href="{% url 'portal:login' %}">Início</a>
+    </nav>
 
 {% block title %}Prontuário - {{ pet.nome }} - TosseCheck{% endblock %}
 
