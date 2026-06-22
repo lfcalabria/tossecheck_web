@@ -60,7 +60,7 @@
   <h2 class="card-title">
     Vídeos de Tosse
     {% if pet.videos %}
-      <span style="font-size:.8rem;font-weight:400;color:var(--tx2);margin-left:8px;">{{ pet.videos|length }} vídeo{% if pet.videos|length != 1 %}s{% endif %}</span>
+      <span style="font-size:.8rem;font-weight:400;color:var(--n-600);margin-left:8px;">{{ pet.videos|length }} vídeo{% if pet.videos|length != 1 %}s{% endif %}</span>
     {% endif %}
   </h2>
 
@@ -81,7 +81,7 @@
   {% else %}
     <div class="empty">
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z" fill="var(--g300)"/>
+        <path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z" fill="var(--n-300)"/>
       </svg>
       <p>Nenhum vídeo disponível para este pet.</p>
     </div>
@@ -91,7 +91,7 @@
 <!-- NOVA OBSERVAÇÃO -->
 <div class="card">
   <h2 class="card-title">Registrar Observação Clínica</h2>
-  <p style="font-size:.875rem;color:var(--tx2);margin-bottom:16px;">
+  <p style="font-size:.875rem;color:var(--n-600);margin-bottom:16px;">
     A observação será registrada em seu nome e ficará visível no prontuário do animal.
   </p>
 
@@ -132,7 +132,7 @@
   {% else %}
     <div class="empty" id="prontuarioEmpty">
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z" fill="var(--g300)"/>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z" fill="var(--n-300)"/>
       </svg>
       <p>Nenhuma observação registrada ainda.</p>
     </div>

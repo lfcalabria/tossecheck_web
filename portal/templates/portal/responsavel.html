@@ -21,7 +21,7 @@
 {% if not responsavel_encontrado and not mostrar_cadastro %}
   <div class="card" style="max-width:520px;">
     <h2 class="card-title">Buscar por CPF</h2>
-    <p style="font-size:.875rem;color:var(--tx2);margin-bottom:20px;">
+    <p style="font-size:.875rem;color:var(--n-600);margin-bottom:20px;">
       Informe o CPF do responsável pelo animal para localizar ou cadastrar o tutor.
     </p>
     <form method="post">
@@ -47,12 +47,12 @@
 {% if responsavel_encontrado %}
   <div class="card found-row" style="max-width:520px;">
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
-      <div style="width:48px;height:48px;border-radius:50%;background:var(--g100);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--g700)" aria-hidden="true"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--blue-50);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--blue-700)" aria-hidden="true"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
       </div>
       <div>
         <h2 class="card-title" style="margin-bottom:2px;">Responsável Encontrado</h2>
-        <p style="font-size:1rem;font-weight:600;color:var(--tx);margin:0;">{{ responsavel_nome }}</p>
+        <p style="font-size:1rem;font-weight:600;color:var(--n-800);margin:0;">{{ responsavel_nome }}</p>
       </div>
     </div>
 
@@ -69,7 +69,7 @@
 {% if mostrar_cadastro %}
   <div class="card" style="max-width:520px;">
     <h2 class="card-title">Cadastrar Novo Responsável</h2>
-    <p style="font-size:.875rem;color:var(--tx2);margin-bottom:20px;">
+    <p style="font-size:.875rem;color:var(--n-600);margin-bottom:20px;">
       CPF não encontrado no sistema. Preencha os dados abaixo para cadastrar o tutor.
     </p>
 
@@ -129,7 +129,7 @@
   var cadastroCpf = document.getElementById('id_cpf');
   if (cadastroCpf) {
     cadastroCpf.setAttribute('readonly', 'readonly');
-    cadastroCpf.style.backgroundColor = 'var(--g50)';
+    cadastroCpf.style.backgroundColor = 'var(--n-50)';
     cadastroCpf.style.cursor = 'not-allowed';
   }
 }());

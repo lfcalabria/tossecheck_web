@@ -5,6 +5,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Portal Veterinário — TosseCheck{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'portal/pets.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
@@ -14,15 +17,7 @@
     <div class="header-inner">
 
       <a href="{% url 'portal:responsavel' %}" class="logo" aria-label="TosseCheck — Início">
-        <span class="logo-mark" aria-hidden="true">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4.5 9.5C4.5 8.1 5.6 7 7 7s2.5 1.1 2.5 2.5S8.4 12 7 12 4.5 10.9 4.5 9.5z" fill="currentColor"/>
-            <path d="M14.5 9.5C14.5 8.1 15.6 7 17 7s2.5 1.1 2.5 2.5S18.4 12 17 12 14.5 10.9 14.5 9.5z" fill="currentColor"/>
-            <path d="M2 14.5C2 13.1 3.1 12 4.5 12S7 13.1 7 14.5 5.9 17 4.5 17 2 15.9 2 14.5z" fill="currentColor"/>
-            <path d="M17 14.5C17 13.1 18.1 12 19.5 12S22 13.1 22 14.5 20.9 17 19.5 17 17 15.9 17 14.5z" fill="currentColor"/>
-            <path d="M12 11c-3.3 0-6 2-6 5 0 2 1.8 4 6 4s6-2 6-4c0-3-2.7-5-6-5z" fill="currentColor"/>
-          </svg>
-        </span>
+        <img src="{% static 'portal/img/logo.png' %}" alt="TosseCheck" class="logo-img">
         <span class="logo-text">
           <span class="logo-name">TosseCheck</span>
           <span class="logo-tagline">Telemedicina Veterinária</span>
