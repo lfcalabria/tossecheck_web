@@ -4,10 +4,6 @@ from . import views
 app_name = "portal"
 
 urlpatterns = [
-    path("demo/", views.demo_start, name="demo_start"),
-    path("preview/", views.preview_template, name="preview"),
-    path("preview/<slug:template_name>/", views.preview_template, name="preview_template"),
-
     # =========================
     # AUTENTICAÇÃO
     # =========================

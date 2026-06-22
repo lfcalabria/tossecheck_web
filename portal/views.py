@@ -1,7 +1,6 @@
 import json
 import re
 import requests
-import uuid
 from datetime import datetime
 
 from django.conf import settings
@@ -26,6 +25,15 @@ def safe_json(response: requests.Response):
         return response.json()
     except ValueError:
         return None
+
+def payload_request(request):
+    content_type = request.META.get("CONTENT_TYPE", "").lower()
+    if "application/json" in content_type:
+        try:
+            return json.loads(request.body.decode("utf-8") or "{}")
+        except (TypeError, ValueError, UnicodeDecodeError):
+            return {}
+    return request.POST.dict()
 
 # LOGIN
 @require_http_methods(["GET", "POST"])
@@ -52,9 +60,6 @@ def login_view(request):
 # RESPONSÁVEL
 @require_http_methods(["GET", "POST"])
 def responsavel_view(request):
-    if modo_demo_ativo(request):
-        return demo_responsavel_view(request)
-
     if not request.session.get("vet_uuid"):
         return redirect("portal:login")
     if request.method == "GET":
@@ -129,9 +134,6 @@ def responsavel_view(request):
 # PETS
 @require_http_methods(["GET"])
 def pets_view(request):
-    if modo_demo_ativo(request):
-        return demo_pets_view(request)
-
     if not request.session.get("vet_uuid"):
         return redirect("portal:login")
     responsavel_uuid = request.session.get("responsavel_uuid")
@@ -155,9 +157,6 @@ def pets_view(request):
 @require_http_methods(["POST"])
 @csrf_protect
 def criar_pet(request):
-    if modo_demo_ativo(request):
-        return demo_criar_pet(request)
-
     wants_json = "application/json" in request.META.get("CONTENT_TYPE", "").lower()
 
     if not request.session.get("vet_uuid"):
@@ -206,9 +205,6 @@ def criar_pet(request):
 # PRONTUÁRIO DO PET
 @require_http_methods(["GET"])
 def pet_detalhe_view(request, pet_uuid):
-    if modo_demo_ativo(request):
-        return demo_pet_detalhe_view(request, pet_uuid)
-
     if not request.session.get("vet_uuid"):
         return redirect("portal:login")
     try:
@@ -240,12 +236,6 @@ def pet_detalhe_view(request, pet_uuid):
 
 # LOGOUT
 def logout_view(request):
-    if modo_demo_ativo(request):
-        request.session.flush()
-        request.session["demo_mode"] = True
-        request.session["demo_data"] = demo_data_padrao()
-        return redirect("portal:login")
-
     request.session.flush()
     return redirect("portal:login")
 
@@ -253,9 +243,6 @@ def logout_view(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def proxy_pets(request):
-    if modo_demo_ativo(request):
-        return demo_proxy_pets(request)
-
     if not request.session.get("vet_uuid"):
         return JsonResponse({"erro": "Não autenticado."}, status=401)
     try:
@@ -268,9 +255,6 @@ def proxy_pets(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def proxy_pet_observacao(request, pet_uuid):
-    if modo_demo_ativo(request):
-        return demo_proxy_pet_observacao(request, pet_uuid)
-
     if not request.session.get("vet_uuid"):
         return JsonResponse({"erro": "Não autenticado."}, status=401)
     try:
