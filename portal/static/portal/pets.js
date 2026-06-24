@@ -1,58 +1,154 @@
 (function () {
-  const modal = document.getElementById("petModal");
-  const fab = document.getElementById("fabOpen");
-  const cancel = document.getElementById("cancelModal");
-  const form = document.getElementById("petForm");
+  'use strict';
 
-  const usuarioUuidInput = document.getElementById("usuario_uuid");
-  const nomeInput = document.getElementById("nome");
-  const tipoInput = document.getElementById("tipo");
-  const sexoInput = document.getElementById("sexo");
-  const racaInput = document.getElementById("raca");
-  const idadeInput = document.getElementById("idade");
-  const pesoInput = document.getElementById("peso");
-  const alturaInput = document.getElementById("altura");
+  var modal = document.getElementById('petModal');
+  var openBtn = document.getElementById('fabOpen');
+  var closeBtn = document.getElementById('cancelModal');
+  var cancelBtn = document.getElementById('cancelModal2');
+  var salvarBtn = document.getElementById('salvarPet');
+  var form = document.getElementById('petForm');
+  var formMsg = document.getElementById('petFormMsg');
 
-  fab.onclick = () => modal.classList.add("show");
-  cancel.onclick = () => modal.classList.remove("show");
+  function showFormMsg(type, text) {
+    if (!formMsg) return;
+    formMsg.className = 'alert alert-' + type;
+    formMsg.textContent = text;
+    formMsg.style.display = 'block';
+  }
 
-  modal.onclick = (e) => {
-    if (e.target === modal) modal.classList.remove("show");
-  };
+  function clearFormMsg() {
+    if (!formMsg) return;
+    formMsg.style.display = 'none';
+    formMsg.textContent = '';
+    formMsg.className = '';
+  }
 
-  form.onsubmit = async (e) => {
-    e.preventDefault();
+  function openModal() {
+    if (!modal) return;
+    modal.classList.add('open');
+    document.body.classList.add('modal-open');
+    clearFormMsg();
 
-    const payload = {
-      usuario_uuid: usuarioUuidInput.value,
-      nome: nomeInput.value.trim(),
-      tipo: tipoInput.value,
-      sexo: sexoInput.value || null,
-      raca: racaInput.value.trim() || null,
-      idade: idadeInput.value ? parseInt(idadeInput.value, 10) : null,
-      peso: pesoInput.value ? parseFloat(pesoInput.value) : null,
-      altura: alturaInput.value ? parseFloat(alturaInput.value) : null,
-    };
+    window.setTimeout(function () {
+      var first = form && form.querySelector('[name="nome"]');
+      if (first) first.focus();
+    }, 50);
+  }
 
-    const submitBtn = form.querySelector("button[type='submit']");
-    submitBtn.disabled = true;
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.remove('open');
+    document.body.classList.remove('modal-open');
+    clearFormMsg();
+  }
 
-    try {
-      const r = await fetch(window.PORTAL.proxyCreatePet, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+  function fieldValue(name) {
+    var input = form && form.querySelector('[name="' + name + '"]');
+    return input ? input.value : '';
+  }
 
-      if (r.ok) {
-        location.reload();
-      } else {
-        alert("Erro ao salvar pet");
-        submitBtn.disabled = false;
+  function numberOrNull(value, parser) {
+    if (value === '' || value === null || typeof value === 'undefined') return null;
+    var parsed = parser(value);
+    return isNaN(parsed) ? null : parsed;
+  }
+
+  function setSaving(isSaving) {
+    if (!salvarBtn) return;
+    salvarBtn.disabled = isSaving;
+    salvarBtn.textContent = isSaving ? 'Salvando...' : 'Salvar pet';
+  }
+
+  if (openBtn) openBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  if (modal) {
+    modal.addEventListener('click', function (event) {
+      if (event.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+  }
+
+  if (form) {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      if (salvarBtn) salvarBtn.click();
+    });
+  }
+
+  if (salvarBtn && form) {
+    salvarBtn.addEventListener('click', function () {
+      var url = window.PORTAL && window.PORTAL.criarPetUrl;
+      var token = window.PORTAL && window.PORTAL.csrfToken;
+      var nome = fieldValue('nome').trim();
+      var tipo = fieldValue('tipo');
+
+      if (!url) {
+        showFormMsg('error', 'Configuração inválida. Recarregue a página.');
+        return;
       }
-    } catch {
-      alert("Erro de conexão");
-      submitBtn.disabled = false;
-    }
-  };
-})();
+
+      if (!nome) {
+        showFormMsg('error', 'Informe o nome do animal.');
+        var nomeInput = form.querySelector('[name="nome"]');
+        if (nomeInput) nomeInput.focus();
+        return;
+      }
+
+      if (!tipo) {
+        showFormMsg('error', 'Selecione o tipo do animal.');
+        var tipoInput = form.querySelector('[name="tipo"]');
+        if (tipoInput) tipoInput.focus();
+        return;
+      }
+
+      var raca = fieldValue('raca').trim();
+      var payload = {
+        usuario_uuid: fieldValue('usuario_uuid'),
+        nome: nome,
+        tipo: tipo,
+        sexo: fieldValue('sexo') || null,
+        raca: raca || null,
+        idade: numberOrNull(fieldValue('idade'), function (value) { return parseInt(value, 10); }),
+        peso: numberOrNull(fieldValue('peso'), parseFloat),
+        altura: numberOrNull(fieldValue('altura'), parseFloat)
+      };
+
+      setSaving(true);
+      clearFormMsg();
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': token || ''
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(function (response) {
+        return response.json().catch(function () {
+          return {};
+        }).then(function (data) {
+          return { ok: response.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        if (result.ok) {
+          window.location.reload();
+          return;
+        }
+
+        showFormMsg('error', result.data.erro || result.data.detail || 'Erro ao salvar pet. Tente novamente.');
+        setSaving(false);
+      })
+      .catch(function () {
+        showFormMsg('error', 'Erro de conexão. Verifique sua rede e tente novamente.');
+        setSaving(false);
+      });
+    });
+  }
+}());

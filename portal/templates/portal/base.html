@@ -3,38 +3,54 @@
 <html lang="pt-br">
 <head>
   <meta charset="utf-8">
-  <title>{% block title %}Portal Veterinário{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Portal Veterinário - TosseCheck{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'portal/pets.css' %}">
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
 
-  <!-- HEADER DO VETERINÁRIO -->
-  <div style="
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      background:#0d6efd;
-      color:white;
-      padding:12px 20px;
-      margin-bottom:20px;
-      border-radius:8px;
-  ">
-    <strong>🐾 TosseCheck</strong>
-
-    <div>
-      <a href="{% url 'portal:responsavel' %}"
-         style="color:white;margin-right:16px;text-decoration:none;font-weight:bold;">
-        Início
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="{% url 'portal:responsavel' %}" class="logo" aria-label="TosseCheck - Início">
+        <img src="{% static 'portal/img/logo.png' %}" alt="TosseCheck" class="logo-img">
+        <span class="logo-text">
+          <span class="logo-name">TosseCheck</span>
+          <span class="logo-tagline">Portal Veterinário</span>
+        </span>
       </a>
 
-      <a href="{% url 'portal:logout' %}"
-         style="color:white;text-decoration:none;font-weight:bold;">
-        Sair
-      </a>
+      <nav class="header-nav" aria-label="Navegação principal">
+        {% if request.session.vet_uuid %}
+          <a href="{% url 'portal:responsavel' %}" class="h-link">Início</a>
+          <span class="h-sep" aria-hidden="true"></span>
+          {% if request.session.vet_nome %}
+            <span class="vet-chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+              </svg>
+              {{ request.session.vet_nome }}
+            </span>
+            <span class="h-sep" aria-hidden="true"></span>
+          {% endif %}
+          <a href="{% url 'portal:logout' %}" class="h-btn">Sair</a>
+        {% endif %}
+      </nav>
     </div>
-  </div>
+  </header>
 
-  {% block content %}{% endblock %}
+  <main class="page-wrapper" id="content">
+    {% block content %}{% endblock %}
+  </main>
 
+  <footer class="site-footer">
+    <span>&copy; {% now "Y" %} TosseCheck - Telemedicina Veterinária</span>
+  </footer>
+
+  <script src="{% static 'portal/pets.js' %}"></script>
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>

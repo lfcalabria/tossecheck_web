@@ -26,6 +26,15 @@ def safe_json(response: requests.Response):
     except ValueError:
         return None
 
+def payload_request(request):
+    content_type = request.META.get("CONTENT_TYPE", "").lower()
+    if "application/json" in content_type:
+        try:
+            return json.loads(request.body.decode("utf-8") or "{}")
+        except (TypeError, ValueError, UnicodeDecodeError):
+            return {}
+    return request.POST.dict()
+
 # LOGIN
 @require_http_methods(["GET", "POST"])
 def login_view(request):
@@ -148,31 +157,48 @@ def pets_view(request):
 @require_http_methods(["POST"])
 @csrf_protect
 def criar_pet(request):
+    wants_json = "application/json" in request.META.get("CONTENT_TYPE", "").lower()
+
     if not request.session.get("vet_uuid"):
+        if wants_json:
+            return JsonResponse({"erro": "Não autenticado."}, status=401)
         return redirect("portal:login")
     responsavel_uuid = request.session.get("responsavel_uuid")
     if not responsavel_uuid:
+        if wants_json:
+            return JsonResponse({"erro": "Responsável não definido."}, status=400)
         messages.error(request, "Responsável não definido.")
         return redirect("portal:pets")
+
+    incoming = payload_request(request)
     payload = {
         "usuario_uuid": responsavel_uuid,
-        "nome": request.POST.get("nome"),
-        "tipo": request.POST.get("tipo"),
-        "sexo": request.POST.get("sexo"),
-        "raca": request.POST.get("raca"),
-        "idade": request.POST.get("idade"),
-        "peso": request.POST.get("peso"),
-        "altura": 0,
+        "nome": incoming.get("nome"),
+        "tipo": incoming.get("tipo"),
+        "sexo": incoming.get("sexo"),
+        "raca": incoming.get("raca"),
+        "idade": incoming.get("idade"),
+        "peso": incoming.get("peso"),
+        "altura": incoming.get("altura"),
     }
     try:
         r = requests.post(f"{BACKEND_URL}/pets/", json=payload, timeout=10)
     except requests.RequestException:
+        if wants_json:
+            return JsonResponse({"erro": "Erro ao conectar com o backend."}, status=502)
         messages.error(request, "Erro ao conectar com o backend.")
         return redirect("portal:pets")
     data = safe_json(r) or {}
     if r.status_code in (200, 201):
+        if wants_json:
+            return JsonResponse({"ok": True, "pet": data}, status=r.status_code)
         messages.success(request, "Pet cadastrado com sucesso.")
     else:
+        if wants_json:
+            return JsonResponse(
+                data or {"erro": "Erro ao cadastrar pet."},
+                status=r.status_code,
+            )
         messages.error(request, data.get("erro", "Erro ao cadastrar pet."))
     return redirect("portal:pets")
 
@@ -235,5 +261,11 @@ def proxy_pet_observacao(request, pet_uuid):
         payload = json.loads(request.body.decode("utf-8"))
     except Exception:
         return JsonResponse({"erro": "JSON inválido."}, status=400)
-    r = requests.post(f"{BACKEND_URL}/pets/{pet_uuid}/observacoes/", json=payload, timeout=10)
+
+    r = requests.post(
+        f"{BACKEND_URL}/pets/{pet_uuid}/observacoes/",
+        json=payload,
+        timeout=10,
+    )
+
     return JsonResponse(safe_json(r) or {}, status=r.status_code)

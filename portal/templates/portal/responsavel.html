@@ -1,184 +1,172 @@
 {% extends "portal/base.html" %}
-{% block title %}Buscar Responsável{% endblock %}
+{% block title %}Pesquisar Responsável - TosseCheck{% endblock %}
 
 {% block content %}
 
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 560px;
-    margin: 40px auto;
-    padding: 20px;
-  }
-
-  .field {
-    margin-bottom: 16px;
-  }
-
-  .messages {
-    margin-bottom: 16px;
-    padding: 12px;
-    border-radius: 6px;
-    background: #f5f5f5;
-  }
-
-  .error {
-    color: #b00020;
-  }
-
-  .success {
-    color: #0a7a2f;
-  }
-
-  .info {
-    color: #0a58ca;
-  }
-
-  input, button {
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-  }
-
-  input[readonly] {
-    background: #f2f2f2;
-    color: #444;
-    cursor: not-allowed;
-  }
-
-  button {
-    margin-top: 8px;
-    cursor: pointer;
-  }
-
-  .card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 16px;
-    margin-top: 20px;
-    background: #fff;
-  }
-
-  .section-title {
-    margin-top: 0;
-  }
-
-  .muted {
-    color: #666;
-  }
-</style>
-
-<h1>Pesquisar Responsável</h1>
-<p class="muted">Veterinário logado: {{ vet_nome }}</p>
+<section class="page-hero">
+  <div>
+    <p class="page-kicker">Atendimento</p>
+    <h1 class="pg-title">Pesquisar responsável</h1>
+    <p class="pg-sub">Localize o tutor pelo CPF para acessar os pets vinculados ou iniciar um novo cadastro.</p>
+  </div>
+  {% if vet_nome %}
+    <div class="page-actions">
+      <span class="badge badge-neutral">Logado como {{ vet_nome }}</span>
+    </div>
+  {% endif %}
+</section>
 
 {% if messages %}
-  <div class="messages" role="alert" aria-live="assertive">
-    {% for message in messages %}
-      <div class="{{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-  </div>
+  {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}" role="alert">
+      {{ message }}
+    </div>
+  {% endfor %}
 {% endif %}
 
 {% if not responsavel_encontrado and not mostrar_cadastro %}
-<form method="post">
-  {% csrf_token %}
-  <input type="hidden" name="acao" value="buscar">
+  <div class="content-grid two-col">
+    <aside class="card">
+      <h2 class="card-title">Fluxo do portal</h2>
+      <p class="section-copy">
+        A busca por CPF define o responsável ativo da sessão. Depois disso, o portal libera a lista de pets, vídeos e prontuário clínico.
+      </p>
+      <div class="summary-strip">
+        <div class="summary-item">
+          <span class="summary-label">Etapa</span>
+          <span class="summary-value">01</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Entrada</span>
+          <span class="summary-value">CPF</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Saída</span>
+          <span class="summary-value">Pets</span>
+        </div>
+      </div>
+    </aside>
 
-  <div class="field">
-    <label for="{{ form_busca.cpf.id_for_label }}">
-      {{ form_busca.cpf.label }}
-    </label>
-    {{ form_busca.cpf }}
-    {{ form_busca.cpf.errors }}
+    <section class="card">
+      <h2 class="card-title">Buscar por CPF</h2>
+      <p class="section-copy">Informe o CPF do responsável pelo animal.</p>
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="acao" value="buscar">
+
+        <div class="field">
+          <label for="{{ form_busca.cpf.id_for_label }}">{{ form_busca.cpf.label }}</label>
+          {{ form_busca.cpf }}
+          {% if form_busca.cpf.errors %}
+            <ul class="errorlist">{% for e in form_busca.cpf.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">
+          Buscar responsável
+        </button>
+      </form>
+    </section>
   </div>
-
-  <button type="submit">Buscar</button>
-</form>
 {% endif %}
 
 {% if responsavel_encontrado %}
-<div class="card">
-  <h2 class="section-title">Responsável encontrado</h2>
-  <p><strong>Nome:</strong> {{ responsavel_nome }}</p>
+  <section class="card found-card">
+    <div class="identity-row">
+      <div class="identity-icon" aria-hidden="true">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+        </svg>
+      </div>
+      <div>
+        <p class="identity-title">Responsável encontrado</p>
+        <p class="identity-name">{{ responsavel_nome }}</p>
+        {% if responsavel_cpf %}<p class="toolbar-meta">{{ responsavel_cpf }}</p>{% endif %}
+      </div>
+    </div>
 
-  <form method="post" action="{% url 'portal:responsavel' %}">
-    {% csrf_token %}
-    <input type="hidden" name="acao" value="prosseguir">
-    <button type="submit">Prosseguir</button>
-  </form>
-</div>
+    <form method="post" action="{% url 'portal:responsavel' %}">
+      {% csrf_token %}
+      <input type="hidden" name="acao" value="prosseguir">
+      <button type="submit" class="btn btn-primary">
+        Ver pets deste responsável
+      </button>
+    </form>
+  </section>
 {% endif %}
 
 {% if mostrar_cadastro %}
-<div class="card">
-  <h2 class="section-title">Cadastrar novo responsável</h2>
+  <div class="content-grid two-col">
+    <aside class="card">
+      <h2 class="card-title">Novo tutor</h2>
+      <p class="section-copy">
+        O CPF informado ainda não possui cadastro. Registre os dados do responsável para associar pets e acompanhar os registros clínicos.
+      </p>
+      <span class="badge badge-status">Cadastro pendente</span>
+    </aside>
 
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="acao" value="cadastrar">
+    <section class="card">
+      <h2 class="card-title">Cadastrar responsável</h2>
 
-    <div class="field">
-      <label for="{{ form_cadastro.cpf.id_for_label }}">
-        {{ form_cadastro.cpf.label }}
-      </label>
-      {{ form_cadastro.cpf }}
-      {{ form_cadastro.cpf.errors }}
-    </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="acao" value="cadastrar">
 
-    <div class="field">
-      <label for="{{ form_cadastro.nome.id_for_label }}">
-        {{ form_cadastro.nome.label }}
-      </label>
-      {{ form_cadastro.nome }}
-      {{ form_cadastro.nome.errors }}
-    </div>
+        <div class="field">
+          <label for="{{ form_cadastro.cpf.id_for_label }}">{{ form_cadastro.cpf.label }}</label>
+          {{ form_cadastro.cpf }}
+          {% if form_cadastro.cpf.errors %}
+            <ul class="errorlist">{% for e in form_cadastro.cpf.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
 
-    <div class="field">
-      <label for="{{ form_cadastro.telefone.id_for_label }}">
-        {{ form_cadastro.telefone.label }}
-      </label>
-      {{ form_cadastro.telefone }}
-      {{ form_cadastro.telefone.errors }}
-    </div>
+        <div class="field">
+          <label for="{{ form_cadastro.nome.id_for_label }}">{{ form_cadastro.nome.label }}</label>
+          {{ form_cadastro.nome }}
+          {% if form_cadastro.nome.errors %}
+            <ul class="errorlist">{% for e in form_cadastro.nome.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
 
-    <button type="submit">Cadastrar</button>
-  </form>
-</div>
+        <div class="field">
+          <label for="{{ form_cadastro.telefone.id_for_label }}">{{ form_cadastro.telefone.label }}</label>
+          {{ form_cadastro.telefone }}
+          {% if form_cadastro.telefone.errors %}
+            <ul class="errorlist">{% for e in form_cadastro.telefone.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">
+          Cadastrar responsável
+        </button>
+      </form>
+    </section>
+  </div>
 {% endif %}
 
+{% endblock %}
+
+{% block extra_scripts %}
 <script>
-  const cpfInput = document.getElementById("cpf");
-  if (cpfInput) {
-    cpfInput.addEventListener("input", function () {
-      let value = this.value.replace(/\D/g, "").slice(0, 11);
-
-      if (value.length <= 3) {
-        this.value = value;
-        return;
-      }
-
-      if (value.length <= 6) {
-        this.value = value.slice(0, 3) + "." + value.slice(3);
-        return;
-      }
-
-      if (value.length <= 9) {
-        this.value = value.slice(0, 3) + "." + value.slice(3, 6) + "." + value.slice(6);
-        return;
-      }
-
-      this.value =
-        value.slice(0, 3) + "." +
-        value.slice(3, 6) + "." +
-        value.slice(6, 9) + "-" +
-        value.slice(9);
+(function () {
+  function maskCpf(input) {
+    input.addEventListener('input', function () {
+      var v = this.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length <= 3) { this.value = v; return; }
+      if (v.length <= 6) { this.value = v.slice(0, 3) + '.' + v.slice(3); return; }
+      if (v.length <= 9) { this.value = v.slice(0, 3) + '.' + v.slice(3, 6) + '.' + v.slice(6); return; }
+      this.value = v.slice(0, 3) + '.' + v.slice(3, 6) + '.' + v.slice(6, 9) + '-' + v.slice(9);
     });
   }
 
-  const cpfCadastro = document.getElementById("id_cpf");
-  if (cpfCadastro) {
-    cpfCadastro.setAttribute("readonly", "readonly");
-  }
-</script>
+  var search = document.getElementById('cpf');
+  if (search) maskCpf(search);
 
+  var cadastroCpf = document.getElementById('id_cpf');
+  if (cadastroCpf) {
+    cadastroCpf.setAttribute('readonly', 'readonly');
+  }
+}());
+</script>
 {% endblock %}
