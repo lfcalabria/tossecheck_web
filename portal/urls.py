@@ -9,6 +9,7 @@ urlpatterns = [
     # =========================
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
+    path("demo/", views.demo_view, name="demo"),
 
     # =========================
     # RESPONSÁVEL
