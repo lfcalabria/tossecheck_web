@@ -15,4 +15,10 @@ media/
 Thumbs.db
 .DS_Store
 
-htmlcov/*
+.coverage
+coverage.xml
+htmlcov/
+*.log
+runserver.err
+runserver.log
+.pytest_cache/

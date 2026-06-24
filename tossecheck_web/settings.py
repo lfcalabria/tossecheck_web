@@ -2,15 +2,34 @@
 Django settings for tossecheck_web project.
 """
 
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-sua-secret-key-aqui-mude-em-producao'
 
-DEBUG = True
+def env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+
+def env_list(name, default):
+    value = os.getenv(name)
+    if not value:
+        return default
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-sua-secret-key-aqui-mude-em-producao",
+)
+
+DEBUG = env_bool("DJANGO_DEBUG", True)
+
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["127.0.0.1", "localhost"])
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -113,9 +132,9 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_PROVIDERS = {
     'microsoft': {
         'APP': {
-            'client_id': 'seu-microsoft-client-id-aqui',
-            'secret': 'seu-microsoft-client-secret-aqui',
-            'key': '',
+            'client_id': os.getenv('MICROSOFT_CLIENT_ID', 'seu-microsoft-client-id-aqui'),
+            'secret': os.getenv('MICROSOFT_CLIENT_SECRET', 'seu-microsoft-client-secret-aqui'),
+            'key': os.getenv('MICROSOFT_CLIENT_KEY', ''),
         },
         'SCOPE': ['openid', 'email', 'profile', 'User.Read'],
     },
@@ -125,7 +144,8 @@ SESSION_COOKIE_AGE = 3600
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_SAVE_EVERY_REQUEST = True
 
-BACKEND_API_URL = "http://127.0.0.1:8000/api/v1"
+BACKEND_API_URL = os.getenv("BACKEND_API_URL", "http://127.0.0.1:8000/api/v1")
+DEMO_MODE = env_bool("DEMO_MODE", DEBUG)
 
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True

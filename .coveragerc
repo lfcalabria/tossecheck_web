@@ -9,5 +9,5 @@ omit =
     */apps.py
     */urls.py
     */admin.py
-    */migration/*
+    */migrations/*
     */tests/*
