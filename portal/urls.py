@@ -36,4 +36,10 @@ urlpatterns = [
         views.proxy_pet_observacao,
         name="proxy_pet_observacao",
     ),
+
+    # =========================
+    # VÍDEO E CLASSIFICAÇÕES
+    # =========================
+    path("video/<uuid:video_uuid>/", views.video_detalhe_view, name="video_detalhe"),
+    path("video/<uuid:video_uuid>/classificar/", views.nova_classificacao_view, name="nova_classificacao"),
 ]

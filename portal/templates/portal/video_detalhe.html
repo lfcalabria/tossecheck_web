@@ -1,0 +1,100 @@
+{% extends "portal/base.html" %}
+
+{% block title %}Detalhe do Vídeo - TosseCheck{% endblock %}
+
+{% block content %}
+
+<section class="page-hero">
+  <div>
+    <a href="javascript:history.back()" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+      </svg>
+      Voltar
+    </a>
+    <p class="page-kicker">Vídeo de tosse</p>
+    <h1 class="pg-title">Detalhe do Vídeo</h1>
+  </div>
+</section>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}" role="alert">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="content-grid">
+  <section class="card">
+    <h2 class="card-title">Reprodução</h2>
+    {% if video_url %}
+      <video controls preload="metadata" style="width:100%;max-width:720px;border-radius:8px;">
+        <source src="{{ video_url }}" type="video/mp4">
+        Seu navegador não suporta reprodução de vídeo.
+      </video>
+    {% else %}
+      <div class="empty">
+        <p>Vídeo não encontrado.</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <div class="toolbar">
+      <div>
+        <h2 class="toolbar-title">Classificações</h2>
+        <p class="toolbar-meta">
+          {% if classificacoes %}
+            {{ classificacoes|length }} classificaç{{ classificacoes|length|pluralize:"ão,ões" }}
+          {% else %}
+            Nenhuma classificação
+          {% endif %}
+        </p>
+      </div>
+      <a href="{% url 'portal:nova_classificacao' video_uuid %}" class="btn btn-primary">
+        + Nova Classificação
+      </a>
+    </div>
+
+    {% if classificacoes %}
+      <div style="overflow-x:auto;">
+        <table class="table" style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:2px solid var(--neutral-200);text-align:left;">
+              <th style="padding:8px;">Data</th>
+              <th style="padding:8px;">Duração</th>
+              <th style="padding:8px;">Tipo de Som</th>
+              <th style="padding:8px;">Fator</th>
+              <th style="padding:8px;">Estridor</th>
+              <th style="padding:8px;">Ester tor</th>
+              <th style="padding:8px;">Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in classificacoes %}
+            <tr style="border-bottom:1px solid var(--neutral-100);">
+              <td style="padding:8px;">{{ c.data_cadastro }}</td>
+              <td style="padding:8px;">{{ c.duracao }}</td>
+              <td style="padding:8px;">{{ c.tipo_som }}</td>
+              <td style="padding:8px;">{{ c.fator }}</td>
+              <td style="padding:8px;">{% if c.estridor %}✅ Sim{% else %}❌ Não{% endif %}</td>
+              <td style="padding:8px;">{% if c.estertor %}✅ Sim{% else %}❌ Não{% endif %}</td>
+              <td style="padding:8px;">{{ c.obs|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm-1 1.5L18.5 9H13V3.5ZM6 20V4h5v7h7v9H6Z" fill="var(--neutral-300)"/>
+        </svg>
+        <p>Nenhuma classificação cadastrada para este vídeo.</p>
+      </div>
+    {% endif %}
+  </section>
+</div>
+
+{% endblock %}

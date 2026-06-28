@@ -140,3 +140,62 @@ class PetForm(forms.Form):
             "min": "0",
         }),
     )
+
+class ClassificacaoForm(forms.Form):
+    duracao = forms.ChoiceField(
+        label="Duração",
+        choices=[
+            ("", "Selecione..."),
+            ("aguda", "Aguda (<3s)"),
+            ("subaguda", "Subaguda (3-8s)"),
+            ("cronica", "Crônica (>8s)"),
+        ],
+        widget=forms.RadioSelect,
+    )
+    tipo_som = forms.ChoiceField(
+        label="Tipo de Som",
+        choices=[
+            ("", "Selecione..."),
+            ("aspera_alta", "Áspera/Alta"),
+            ("ganso", "Ganso"),
+            ("sibilante", "Sibilante"),
+            ("suave_inspiracao", "Suave com Inspiração"),
+            ("engasgo_degluticao", "Engasgo/Deglutição Final"),
+        ],
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    fator = forms.ChoiceField(
+        label="Fator",
+        choices=[
+            ("", "Selecione..."),
+            ("exercicio", "Exercício"),
+            ("excitamento", "Excitamento"),
+            ("pos_prandial", "Pós-prandial"),
+            ("ambiente", "Ambiente"),
+            ("outros", "Outros"),
+        ],
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    fator_outros = forms.CharField(
+        label="Se outros, qual?",
+        required=False,
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "Descreva o fator",
+        }),
+    )
+    estridor = forms.BooleanField(
+        label="Estridor",
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
+    estertor = forms.BooleanField(
+        label="Ester tor",
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
+    obs = forms.CharField(
+        label="Observação",
+        required=False,
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+    )

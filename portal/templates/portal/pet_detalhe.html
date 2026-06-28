@@ -109,17 +109,13 @@
       </div>
 
       {% if pet.videos %}
-        <div class="video-grid">
+        <div class="video-list">
           {% for v in pet.videos %}
-            <article class="video-card">
-              <video controls preload="metadata">
-                <source src="{{ BACKEND_BASE_URL }}{{ v.url }}" type="video/mp4">
-                Seu navegador não suporta reprodução de vídeo.
-              </video>
-              {% if v.data_upload %}
-                <p class="video-date">{{ v.data_upload }}</p>
-              {% endif %}
-            </article>
+            <a href="{% url 'portal:video_detalhe' v.uuid %}" class="video-list-item" style="display:flex;align-items:center;padding:12px 16px;border:1px solid var(--neutral-200);border-radius:8px;margin-bottom:8px;text-decoration:none;color:var(--text-primary);transition:background .15s;gap:12px;">
+              <span style="font-size:1.25rem;">🎬</span>
+              <span style="flex:1;">Vídeo gravado em {{ v.data_upload }}</span>
+              <span style="color:var(--neutral-400);font-size:1.1rem;">→</span>
+            </a>
           {% endfor %}
         </div>
       {% else %}

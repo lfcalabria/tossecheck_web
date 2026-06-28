@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
-from .forms import LoginForm, BuscarResponsavelForm, CadastroResponsavelForm
+from .forms import *
 
 # CONFIGURAÇÃO
 BACKEND_URL = getattr(settings, "BACKEND_API_URL", "http://127.0.0.1:8000/api/v1").rstrip("/")
@@ -269,3 +269,98 @@ def proxy_pet_observacao(request, pet_uuid):
     )
 
     return JsonResponse(safe_json(r) or {}, status=r.status_code)
+
+# DETALHE DO VÍDEO
+# DETALHE DO VÍDEO
+@require_http_methods(["GET"])
+def video_detalhe_view(request, video_uuid):
+    if not request.session.get("vet_uuid"):
+        return redirect("portal:login")
+
+    # Busca dados do vídeo no backend
+    video_url = None
+    try:
+        r = requests.get(f"{BACKEND_URL}/video/{video_uuid}/", timeout=10)
+        if r.status_code == 200:
+            data = safe_json(r) or {}
+            video_url = f"{BACKEND_BASE_URL}{data.get('url', '')}"
+    except requests.RequestException:
+        pass
+
+    # Busca classificações do vídeo
+    try:
+        r = requests.get(f"{BACKEND_URL}/video/{video_uuid}/classificacoes/", timeout=10)
+    except requests.RequestException:
+        messages.error(request, "Erro ao conectar com o backend.")
+        return redirect("portal:pets")
+
+    classificacoes = []
+    if r.status_code == 200:
+        data = safe_json(r) or {}
+        classificacoes = data.get("classificacoes", [])
+
+    contexto = {
+        "video_uuid": str(video_uuid),
+        "video_url": video_url,
+        "classificacoes": classificacoes,
+        "vet_nome": request.session.get("vet_nome"),
+    }
+    return render(request, "portal/video_detalhe.html", contexto)
+
+# NOVA CLASSIFICAÇÃO
+@require_http_methods(["GET", "POST"])
+def nova_classificacao_view(request, video_uuid):
+    if not request.session.get("vet_uuid"):
+        return redirect("portal:login")
+
+    if request.method == "GET":
+        form = ClassificacaoForm()
+        contexto = {
+            "form": form,
+            "video_uuid": str(video_uuid),
+            "vet_nome": request.session.get("vet_nome"),
+        }
+        return render(request, "portal/nova_classificacao.html", contexto)
+
+    # POST
+    form = ClassificacaoForm(request.POST)
+    if not form.is_valid():
+        contexto = {
+            "form": form,
+            "video_uuid": str(video_uuid),
+            "vet_nome": request.session.get("vet_nome"),
+        }
+        return render(request, "portal/nova_classificacao.html", contexto)
+
+    fator = form.cleaned_data["fator"]
+    if fator == "outros":
+        fator_descricao = form.cleaned_data.get("fator_outros", "").strip()
+        if not fator_descricao:
+            fator_descricao = "Outros"
+        fator = f"Outros - {fator_descricao}"
+
+    payload = {
+        "video_uuid": str(video_uuid),
+        "duracao": form.cleaned_data["duracao"],
+        "tipo_som": form.cleaned_data["tipo_som"],
+        "fator": fator,
+        "estridor": form.cleaned_data["estridor"],
+        "estertor": form.cleaned_data["estertor"],
+        "obs": form.cleaned_data.get("obs", ""),
+        "veterinario_uuid": request.session.get("vet_uuid", ""),
+    }
+
+    try:
+        r = requests.post(f"{BACKEND_URL}/video/classificacao/", json=payload, timeout=10)
+    except requests.RequestException:
+        messages.error(request, "Erro ao conectar com o backend.")
+        return redirect("portal:video_detalhe", video_uuid=video_uuid)
+
+    if r.status_code == 201:
+        messages.success(request, "Classificação cadastrada com sucesso.")
+    else:
+        data = safe_json(r) or {}
+        messages.error(request, data.get("erro", "Erro ao cadastrar classificação."))
+
+    return redirect("portal:video_detalhe", video_uuid=video_uuid)
+
