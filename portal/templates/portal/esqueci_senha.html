@@ -4,79 +4,52 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Acesso ao Portal - TosseCheck</title>
+  <title>Esqueci a Senha - TosseCheck</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'portal/pets.css' %}">
 </head>
 <body class="login-page">
-
   <div class="login-shell">
     <section class="login-brand-panel" aria-label="TosseCheck">
       <div class="login-brand-top">
         <img src="{% static 'portal/img/logo.png' %}" alt="TosseCheck" class="login-logo-img">
         <p class="login-brand-title">Tosse<span>Check</span></p>
       </div>
-
       <div class="login-brand-copy">
         <p class="page-kicker">Portal do Veterinário</p>
-        <h1>Dados clínicos de tosse com leitura rápida e segura.</h1>
-        <p>
-          Acesse responsáveis, pets, vídeos enviados e observações clínicas em uma interface pensada para rotina profissional.
-        </p>
+        <h1>Esqueceu sua senha?</h1>
+        <p>Informe seu CRMV e enviaremos um link de redefinição para o email cadastrado.</p>
       </div>
-
       <p class="login-brand-note">
         Sistema desenvolvido no Mestrado Profissional em Engenharia de Software do CESAR School.
       </p>
     </section>
-
     <main class="login-form-panel">
       <div class="login-card-head">
-        <h2>Acesso restrito</h2>
-        <p>Entre com seu CRMV e senha para continuar.</p>
+        <h2>Recuperar acesso</h2>
+        <p>Digite seu CRMV cadastrado.</p>
       </div>
-
       {% if messages %}
         {% for message in messages %}
           <div class="alert alert-error" role="alert">{{ message }}</div>
         {% endfor %}
       {% endif %}
-
-      <form method="post" action="{% url 'portal:login' %}">
+      <form method="post" action="{% url 'portal:esqueci_senha' %}">
         {% csrf_token %}
-
         <div class="field">
-          <label for="{{ form.crmv.id_for_label }}">{{ form.crmv.label }}</label>
-          {{ form.crmv }}
-          {% if form.crmv.errors %}
-            <ul class="errorlist">
-              {% for e in form.crmv.errors %}<li>{{ e }}</li>{% endfor %}
-            </ul>
-          {% endif %}
+          <label for="crmv">CRMV</label>
+          <input type="text" name="crmv" id="crmv" class="form-control" placeholder="Digite seu CRMV" required>
         </div>
-
-        <div class="field">
-          <label for="{{ form.senha.id_for_label }}">{{ form.senha.label }}</label>
-          {{ form.senha }}
-          {% if form.senha.errors %}
-            <ul class="errorlist">
-              {% for e in form.senha.errors %}<li>{{ e }}</li>{% endfor %}
-            </ul>
-          {% endif %}
-        </div>
-
         <button type="submit" class="btn btn-primary btn-full">
-          Entrar no portal
+          Enviar link de redefinição
         </button>
       </form>
-
       <p class="login-footer">
-        <a href="{% url 'portal:esqueci_senha' %}">Esqueci minha senha</a>
+        <a href="{% url 'portal:login' %}">Voltar para o login</a>
       </p>
     </main>
   </div>
-
 </body>
 </html>

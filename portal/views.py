@@ -364,3 +364,63 @@ def nova_classificacao_view(request, video_uuid):
 
     return redirect("portal:video_detalhe", video_uuid=video_uuid)
 
+@require_http_methods(["GET", "POST"])
+def esqueci_senha_view(request):
+    if request.method == "POST":
+        crmv = request.POST.get("crmv", "").strip()
+        if not crmv:
+            messages.error(request, "Informe seu CRMV.")
+            return render(request, "portal/esqueci_senha.html")
+        try:
+            r = requests.post(f"{BACKEND_URL}/esqueci-senha/", json={"crmv": crmv}, timeout=10)
+        except requests.RequestException:
+            messages.error(request, "Erro ao conectar com o backend.")
+            return render(request, "portal/esqueci_senha.html")
+        data = safe_json(r) or {}
+        messages.success(request, data.get("mensagem", "Verifique seu email para redefinir a senha."))
+        return redirect("portal:login")
+    return render(request, "portal/esqueci_senha.html")
+
+@require_http_methods(["GET", "POST"])
+def redefinir_senha_view(request):
+    if request.method == "GET":
+        token = request.GET.get("token", "")
+        if not token:
+            messages.error(request, "Link inválido.")
+            return redirect("portal:login")
+        return render(request, "portal/redefinir_senha.html", {"token": token})
+
+    # POST
+    token = request.POST.get("token", "")
+    nova_senha = request.POST.get("nova_senha", "")
+    confirmar = request.POST.get("confirmar_senha", "")
+
+    if not token:
+        messages.error(request, "Token inválido.")
+        return redirect("portal:login")
+
+    if not nova_senha or len(nova_senha) < 6:
+        messages.error(request, "A senha deve ter no mínimo 6 caracteres.")
+        return render(request, "portal/redefinir_senha.html", {"token": token})
+
+    if nova_senha != confirmar:
+        messages.error(request, "As senhas não conferem.")
+        return render(request, "portal/redefinir_senha.html", {"token": token})
+
+    try:
+        r = requests.post(f"{BACKEND_URL}/redefinir-senha/", json={
+            "token": token,
+            "nova_senha": nova_senha
+        }, timeout=10)
+    except requests.RequestException:
+        messages.error(request, "Erro ao conectar com o backend.")
+        return render(request, "portal/redefinir_senha.html", {"token": token})
+
+    data = safe_json(r) or {}
+    if r.status_code == 200:
+        messages.success(request, "Senha redefinida com sucesso! Faça login.")
+        return redirect("portal:login")
+    else:
+        messages.error(request, data.get("erro", "Erro ao redefinir senha."))
+        return render(request, "portal/redefinir_senha.html", {"token": token})
+    

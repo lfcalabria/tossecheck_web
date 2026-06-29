@@ -42,4 +42,10 @@ urlpatterns = [
     # =========================
     path("video/<uuid:video_uuid>/", views.video_detalhe_view, name="video_detalhe"),
     path("video/<uuid:video_uuid>/classificar/", views.nova_classificacao_view, name="nova_classificacao"),
+
+    # =========================
+    # ESQUECI MINHA SENHA
+    # =========================
+    path("esqueci-senha/", views.esqueci_senha_view, name="esqueci_senha"),
+    path("redefinir-senha/", views.redefinir_senha_view, name="redefinir_senha"),
 ]
