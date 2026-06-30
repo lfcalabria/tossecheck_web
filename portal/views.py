@@ -229,6 +229,7 @@ def pet_detalhe_view(request, pet_uuid):
     pet["videos"] = sorted(videos, key=parse_data_upload, reverse=True)
     contexto = {
         "pet": pet,
+        "vet_uuid": request.session.get("vet_uuid"),
         "proxy_pet_observacao_url": f"/portal/proxy/pets/{pet_uuid}/observacoes/",
         "BACKEND_BASE_URL": BACKEND_BASE_URL,
     }
@@ -423,4 +424,27 @@ def redefinir_senha_view(request):
     else:
         messages.error(request, data.get("erro", "Erro ao redefinir senha."))
         return render(request, "portal/redefinir_senha.html", {"token": token})
-    
+
+
+def proxy_editar_observacao(request, pet_uuid, obs_uuid):
+    if request.method != "PUT":
+        return JsonResponse({"erro": "Método não permitido."}, status=405)
+
+    vet_uuid = request.session.get("vet_uuid")
+    if not vet_uuid:
+        return JsonResponse({"erro": "Não autenticado."}, status=401)
+
+    try:
+        data = json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"erro": "JSON inválido."}, status=400)
+
+    data["veterinario_uuid"] = vet_uuid
+
+    url = f"{BACKEND_BASE_URL}/api/v1/pets/{pet_uuid}/observacoes/{obs_uuid}/"
+
+    try:
+        resp = requests.put(url, json=data, timeout=10)
+        return JsonResponse(resp.json(), status=resp.status_code)
+    except requests.RequestException:
+        return JsonResponse({"erro": "Erro de conexão com o backend."}, status=502)

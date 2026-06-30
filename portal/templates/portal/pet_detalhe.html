@@ -1,7 +1,5 @@
 {% extends "portal/base.html" %}
-
 {% block title %}Prontuário - {{ pet.nome }} - TosseCheck{% endblock %}
-
 {% block content %}
 
 <section class="page-hero">
@@ -150,7 +148,25 @@
                     </span>
                   {% endif %}
                 </div>
+
                 <p class="record-text">{{ o.texto }}</p>
+
+                {% if o.historico %}
+                  <div class="record-historico" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--neutral-200);">
+                    {% for h in o.historico %}
+                      <div class="historico-item" style="margin-bottom:4px;font-size:0.8rem;">
+                        <span style="text-decoration:line-through;opacity:0.55;color:var(--neutral-400);">{{ h.texto_original }}</span>
+                        <span style="font-size:0.7rem;color:var(--neutral-400);margin-left:4px;">— alterado em {{ h.data_alteracao }}</span>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                {% if o.veterinario_uuid == vet_uuid and not o.automatica %}
+                  <button type="button" class="btn btn-sm btn-outline" onclick="editarObservacao(this, '{{ o.uuid }}')">
+                    Alterar
+                  </button>
+                {% endif %}
               </article>
             {% endfor %}
           </div>
@@ -174,7 +190,6 @@
 (function () {
   var obsUrl = "{{ proxy_pet_observacao_url }}";
   var csrfTok = "{{ csrf_token }}";
-
   var btnSalvar = document.getElementById('btnSalvarObs');
   var obsTexto = document.getElementById('obsTexto');
   var obsMsg = document.getElementById('obsMsg');
@@ -262,6 +277,114 @@
       });
     });
   }
+
+  /* ========== EDITAR OBSERVAÇÃO ========== */
+  window.editarObservacao = function (btn, obsUuid) {
+    var article = btn.closest('.record-item');
+    if (!article) return;
+
+    var textEl = article.querySelector('.record-text');
+    if (!textEl) return;
+    var textoOriginal = textEl.textContent.trim();
+
+    /* Cria textarea */
+    var textarea = document.createElement('textarea');
+    textarea.value = textoOriginal;
+    textarea.rows = 4;
+    textarea.style.width = '100%';
+    textarea.style.marginBottom = '8px';
+    textarea.style.padding = '8px';
+    textarea.style.border = '1px solid var(--neutral-300)';
+    textarea.style.borderRadius = '6px';
+    textarea.style.fontFamily = 'inherit';
+    textarea.style.fontSize = '0.875rem';
+    textarea.style.boxSizing = 'border-box';
+
+    /* Botões */
+    var btnSalvarEdit = document.createElement('button');
+    btnSalvarEdit.type = 'button';
+    btnSalvarEdit.className = 'btn btn-sm btn-primary';
+    btnSalvarEdit.textContent = 'Salvar';
+
+    var btnCancelar = document.createElement('button');
+    btnCancelar.type = 'button';
+    btnCancelar.className = 'btn btn-sm btn-outline';
+    btnCancelar.textContent = 'Cancelar';
+
+    var btnGroup = document.createElement('div');
+    btnGroup.style.display = 'flex';
+    btnGroup.style.gap = '8px';
+    btnGroup.style.marginTop = '4px';
+    btnGroup.appendChild(btnSalvarEdit);
+    btnGroup.appendChild(btnCancelar);
+
+    var container = document.createElement('div');
+    container.appendChild(textarea);
+    container.appendChild(btnGroup);
+
+    var originalContent = textEl;
+    textEl.replaceWith(container);
+
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+    /* Cancelar */
+    btnCancelar.addEventListener('click', function () {
+      container.replaceWith(originalContent);
+    });
+
+    /* Salvar */
+    btnSalvarEdit.addEventListener('click', function () {
+      var textoNovo = textarea.value.trim();
+      if (!textoNovo) {
+        showMsg('error', 'A observação não pode ficar vazia.');
+        return;
+      }
+      if (textoNovo === textoOriginal) {
+        container.replaceWith(originalContent);
+        return;
+      }
+
+      btnSalvarEdit.disabled = true;
+      btnSalvarEdit.textContent = 'Salvando...';
+
+      var editUrl = '/portal/proxy/pets/{{ pet.uuid }}/observacoes/' + obsUuid + '/';
+
+      fetch(editUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfTok
+        },
+        body: JSON.stringify({ texto: textoNovo })
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.alterado) {
+          var novoP = document.createElement('p');
+          novoP.className = 'record-text';
+          novoP.textContent = data.texto;
+          container.replaceWith(novoP);
+          showMsg('success', 'Observação alterada com sucesso. Versão anterior salva no histórico.');
+        } else if (data.erro) {
+          showMsg('error', data.erro);
+          container.replaceWith(originalContent);
+        } else {
+          container.replaceWith(originalContent);
+        }
+      })
+      .catch(function () {
+        showMsg('error', 'Erro de conexão. Tente novamente.');
+        container.replaceWith(originalContent);
+      })
+      .finally(function () {
+        if (btnSalvarEdit.parentNode) {
+          btnSalvarEdit.disabled = false;
+          btnSalvarEdit.textContent = 'Salvar';
+        }
+      });
+    });
+  };
 }());
 </script>
 {% endblock %}

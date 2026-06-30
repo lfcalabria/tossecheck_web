@@ -36,6 +36,10 @@ urlpatterns = [
         views.proxy_pet_observacao,
         name="proxy_pet_observacao",
     ),
+    path(
+        "proxy/pets/<uuid:pet_uuid>/observacoes/<uuid:obs_uuid>/",
+        views.proxy_editar_observacao,
+        name="proxy_editar_observacao"),
 
     # =========================
     # VÍDEO E CLASSIFICAÇÕES
